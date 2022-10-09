@@ -113,6 +113,7 @@ if ! node -v &>/dev/null; then
     curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
     sudo bash nodesource_setup.sh
     sudo apt -y install nodejs
+    rm nodesource_setup.sh
 else
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Update NodeJS and NPM"
@@ -177,15 +178,31 @@ else
 fi
 
 # Add cron job
-if [ "${1,,}" != "cron" ] && ! [ -f "$CRONFILE" ]; then
+CRONCONT="* * * * * root $SCRIPTPATH cron"
+if ! [ -f "$CRONFILE" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Add cron job"
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    if ! echo "* * * * * $SCRIPTPATH cron" > "$CRONFILE"; then
+    if ! echo -n "$CRONCONT" > "$CRONFILE"; then
         echo "ERROR: Could not add cron job!"; 
         exit 3
     fi
     echo "Cron job successfully added"
+else
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    echo "Update cron job"
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+	md5cur=($(md5sum "$CRONFILE"))
+	md5new=($(echo "$CRONCONT" | md5sum))
+	if [ "$md5cur" != "$md5new" ]; then
+        if ! echo -n "$CRONCONT" > "$CRONFILE"; then
+            echo "ERROR: Could not update cron job!"; 
+            exit 3
+        fi
+		echo "Cron job successfully updated"
+    else
+		echo "Cron job is up to date"
+	fi
 fi
 
 # Run SyncLink API Specification (in background)
