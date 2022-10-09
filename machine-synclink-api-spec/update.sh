@@ -1,15 +1,20 @@
 #!/bin/bash
-# ------------------------------------------------------------------------------------
+
+# ====================================================================================
 # SYNCLINK API SPEC SETUP/UPDATE SCRIPT
-# This script will setup and automatically update all all services to provide
-# the SyncLink API Spec globally via Apache HTTP Server.
-# ------------------------------------------------------------------------------------
-# Download:
+# -------------------------------------
+# This script will setup and automatically update all services to provide the SyncLink
+# API Spec publicly via Apache HTTP Server by using mod_proxy.
+# After the first download the script will also auto-update itself whenever executed.
+# ====================================================================================
+# DOWNLOAD
+# --------
 # cd ~ && wget -O update.sh https://raw.githubusercontent.com/daverolo/helpers/main/machine-synclink-api-spec/update.sh
-# ------------------------------------------------------------------------------------
-# Run (note that the script will auto update intself too):
+# ====================================================================================
+# EXECUTE 
+# -------
 # bash update.sh
-# ------------------------------------------------------------------------------------
+# ====================================================================================
 
 # Move to home dir
 cd ~
