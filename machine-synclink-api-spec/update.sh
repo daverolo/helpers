@@ -53,6 +53,21 @@ UNIX_TIMESTAMP=$(date +%s)
 CRONFILE=/etc/cron.d/$(basename "$SCRIPTDIR")-"${SCRIPTALIAS}" # MUST NOT HAVE FILE EXTENSION!
 
 #
+# FUNCTIONS
+#
+
+# trim whitespaces
+# example: myvar=$(trim "$myvar")
+trim() {
+    local var="$*"
+    # remove leading whitespace characters
+    var="${var#"${var%%[![:space:]]*}"}"
+    # remove trailing whitespace characters
+    var="${var%"${var##*[![:space:]]}"}"   
+    echo -n "$var"
+}
+
+#
 # CHECK PERMISSIONS
 #
 
@@ -178,12 +193,12 @@ else
 fi
 
 # Add cron job and run each 10 minutes
-CRONCONT="*/10 * * * * root /bin/bash $SCRIPTPATH cron\n" # MUST END WITH NEWLINE!
+CRONCONT="*/10 * * * * root /bin/bash $SCRIPTPATH cron" # MUST END WITH NEWLINE!
 if ! [ -f "$CRONFILE" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Add cron job"
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    if ! echo -ne "$CRONCONT" > "$CRONFILE"; then
+    if ! echo "$CRONCONT" > "$CRONFILE"; then
         echo "ERROR: Could not add cron job!"; 
         exit 3
     fi
@@ -193,15 +208,17 @@ else
     echo "Update cron job"
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 	md5cur=($(md5sum "$CRONFILE"))
+    md5cur=$(trim "$md5cur")
 	md5new=($(echo "$CRONCONT" | md5sum))
+    md5new=$(trim "$md5new")
 	if [ "$md5cur" != "$md5new" ]; then
-        if ! echo -ne "$CRONCONT" > "$CRONFILE"; then
+        if ! echo "$CRONCONT" > "$CRONFILE"; then
             echo "ERROR: Could not update cron job!"; 
             exit 3
         fi
 		echo "Cron job successfully updated"
     else
-		echo "Cron job is up to date"
+		echo "Cron job already up to date"
 	fi
 fi
 
