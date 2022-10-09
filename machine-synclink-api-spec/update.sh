@@ -50,7 +50,7 @@ USER=$(whoami)
 HOST=$(hostname -s)
 CURRENTDIR="$PWD"
 UNIX_TIMESTAMP=$(date +%s)
-CRONFILE=/etc/cron.d/$(basename "$SCRIPTDIR")-"${SCRIPTALIAS}.cron"
+CRONFILE=/etc/cron.d/$(basename "$SCRIPTDIR")-"${SCRIPTALIAS}" # MUST NOT HAVE FILE EXTENSION!
 
 #
 # CHECK PERMISSIONS
@@ -178,12 +178,12 @@ else
 fi
 
 # Add cron job
-CRONCONT="* * * * * root /bin/bash $SCRIPTPATH cron"
+CRONCONT="* * * * * root /bin/bash $SCRIPTPATH cron\n" # MUST END WITH NEWLINE!
 if ! [ -f "$CRONFILE" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Add cron job"
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    if ! echo -n "$CRONCONT" > "$CRONFILE"; then
+    if ! echo -ne "$CRONCONT" > "$CRONFILE"; then
         echo "ERROR: Could not add cron job!"; 
         exit 3
     fi
@@ -195,7 +195,7 @@ else
 	md5cur=($(md5sum "$CRONFILE"))
 	md5new=($(echo "$CRONCONT" | md5sum))
 	if [ "$md5cur" != "$md5new" ]; then
-        if ! echo -n "$CRONCONT" > "$CRONFILE"; then
+        if ! echo -ne "$CRONCONT" > "$CRONFILE"; then
             echo "ERROR: Could not update cron job!"; 
             exit 3
         fi
