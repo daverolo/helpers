@@ -1,8 +1,12 @@
 #!/bin/bash
-# SyncLink Api Spec Setup/Update Script (daverolo/synclink-api-spec-update.sh):
-# https://gist.github.com/daverolo/cf0cdc695731db71260c876f408ae265
-# wget -O update.sh <RAWURL>
+# ------------------------------------------------------------------------------------
+# SyncLink Api Spec Setup/Update Script
+# ------------------------------------------------------------------------------------
+# cd ~
+# git clone https://github.com/daverolo/helpers.git
+# cd helpers/machine-synclink-api-spec
 # bash update.sh
+# ------------------------------------------------------------------------------------
 
 # Move to home dir
 cd ~
