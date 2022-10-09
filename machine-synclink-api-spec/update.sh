@@ -177,7 +177,7 @@ else
 fi
 
 # Add cron job
-if [ "${1;;}" != "cron" ] && ! [ -f "$CRONFILE" ]; then
+if [ "${1,,}" != "cron" ] && ! [ -f "$CRONFILE" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Add cron job"
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
@@ -189,7 +189,7 @@ if [ "${1;;}" != "cron" ] && ! [ -f "$CRONFILE" ]; then
 fi
 
 # Run SyncLink API Specification (in background)
-if [ "${1;;}" != "cron" ] || [ "${2;;}" = "updated" ]; then
+if [ "${1,,}" != "cron" ] || [ "${2,,}" = "updated" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Starting SyncLink API Specification"
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
