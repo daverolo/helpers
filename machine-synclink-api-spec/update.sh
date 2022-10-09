@@ -2,14 +2,69 @@
 # ------------------------------------------------------------------------------------
 # SyncLink Api Spec Setup/Update Script
 # ------------------------------------------------------------------------------------
-# cd ~
-# git clone https://github.com/daverolo/helpers.git
-# cd helpers/machine-synclink-api-spec
+# Download:
+# cd ~ && wget -O update.sh https://raw.githubusercontent.com/daverolo/helpers/main/machine-synclink-api-spec/update.sh
+# ------------------------------------------------------------------------------------
+# Run (script will auto update intself):
 # bash update.sh
 # ------------------------------------------------------------------------------------
 
 # Move to home dir
 cd ~
+
+# Init basic vars
+ScriptVer="1.0.0"
+HttpFileStorage="https://raw.githubusercontent.com/daverolo/helpers/main/machine-synclink-api-spec"
+
+# Init main vars
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+SCRIPTNAME=$(basename "$SOURCE")
+SCRIPTPATH="$SCRIPTDIR/$SCRIPTNAME"
+SCRIPTUSER=$(whoami)
+SCRIPTALIAS="${SCRIPTNAME%.*}"
+USER=$(whoami)
+HOST=$(hostname -s)
+CURRENTDIR="$PWD"
+
+# Download source and auto update if hash is different (and file exists on remote host)
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+echo "Checking script for updates"
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+wget --spider -q "$HttpFileStorage/$SCRIPTNAME"; exitcode=$?
+if [ $exitcode = 0 ]; then
+	wget -q -O "$SCRIPTPATH.updatecheck" "$HttpFileStorage/$SCRIPTNAME"	
+	if [ $exitcode != 0 ] || ! [ -f "$SCRIPTPATH.updatecheck" ] ; then
+		echo "ERROR: Could not download latest update from $HttpFileStorage/$SCRIPTNAME!"
+		exit 1
+	fi
+	md5cur=($(md5sum "$SCRIPTPATH"))
+	md5new=($(md5sum "$SCRIPTPATH.updatecheck"))
+	if [ "$md5cur" != "$md5new" ]; then
+		echo "New version available - updating $SCRIPTNAME"
+		if ! mv "$SCRIPTPATH.updatecheck" "$SCRIPTPATH" &>/dev/null; then
+			echo "ERROR: Could not move $SCRIPTPATH.updatecheck to $SCRIPTPATH"
+			exit 1
+		fi
+		if ! chmod 744 "$SCRIPTPATH" &>/dev/null; then
+			echo "ERROR: could not chmod $SCRIPTPATH"
+			exit 1
+		fi
+		echo "SUCCESS: Script successfully updated"
+		bash "$SCRIPTPATH" "$@"; exitcode=$?
+		exit $exitcode
+	else
+		echo "SUCCESS: Script is on the newest (latest) version"
+		rm "$SCRIPTPATH.updatecheck"
+	fi
+else
+	echo "DONE: Currently no script update available on $HttpFileStorage/$SCRIPTNAME"
+fi
 
 # Install NodeJS and NPM
 # https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-22-04
