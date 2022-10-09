@@ -1,6 +1,6 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------------
-# SyncLink Api Spec Setup/Update Script
+# SYNCLINK API SPEC SETUP/UPDATE SCRIPT
 # This script will setup and automatically update all all services to provide
 # the SyncLink API Spec globally via Apache HTTP Server.
 # ------------------------------------------------------------------------------------
