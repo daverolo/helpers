@@ -178,7 +178,7 @@ else
 fi
 
 # Add cron job
-CRONCONT="* * * * * root $SCRIPTPATH cron"
+CRONCONT="* * * * * root /bin/bash $SCRIPTPATH cron"
 if ! [ -f "$CRONFILE" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Add cron job"
