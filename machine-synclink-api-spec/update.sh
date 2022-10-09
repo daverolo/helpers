@@ -177,8 +177,8 @@ else
     cd "$currdir"
 fi
 
-# Add cron job
-CRONCONT="* * * * * root /bin/bash $SCRIPTPATH cron\n" # MUST END WITH NEWLINE!
+# Add cron job and run each 10 minutes
+CRONCONT="*/10 * * * * root /bin/bash $SCRIPTPATH cron\n" # MUST END WITH NEWLINE!
 if ! [ -f "$CRONFILE" ]; then
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     echo "Add cron job"
