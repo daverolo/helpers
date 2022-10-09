@@ -16,8 +16,19 @@
 # bash update.sh
 # ====================================================================================
 
+#
+# ESSENTIALS
+#
+
+# sSetet path manually on top since the script is also called via cron!
+PATH=~/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # Move to home dir
 cd ~
+
+#
+# INIT VARS
+#
 
 # Init basic vars
 ScriptVer="1.0.0"
@@ -39,6 +50,21 @@ USER=$(whoami)
 HOST=$(hostname -s)
 CURRENTDIR="$PWD"
 UNIX_TIMESTAMP=$(date +%s)
+CRONFILE=/etc/cron.d/$(basename "$SCRIPTDIR")-"${SCRIPTALIAS}.cron"
+
+#
+# CHECK PERMISSIONS
+#
+
+# Require root
+if [ "$SCRIPTUSER" != "root" ]; then
+    echo "This script requires root permission to run - abort!"
+    exit 3
+fi
+
+#
+# AUTO UPDATE
+#
 
 # Download source and auto update if hash is different (and file exists on remote host)
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
@@ -64,7 +90,7 @@ if [ $exitcode = 0 ]; then
 			exit 1
 		fi
 		echo "SUCCESS: Script successfully updated"
-		bash "$SCRIPTPATH" "$@"; exitcode=$?
+		bash "$SCRIPTPATH" "$@" updated; exitcode=$?
 		exit $exitcode
 	else
 		echo "SUCCESS: Script is on the newest (latest) version"
@@ -73,6 +99,10 @@ if [ $exitcode = 0 ]; then
 else
 	echo "DONE: Currently no script update available on $HttpFileStorage/$SCRIPTNAME"
 fi
+
+#
+# MAIN FLOW
+#
 
 # Install NodeJS and NPM
 # https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-22-04
@@ -106,7 +136,6 @@ else
     apt -y install apache2
 fi
 
-
 # Setup Apache2 proxy
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo "Configure Apache2 Proxy"
@@ -130,7 +159,6 @@ a2enmod proxy_http
 a2enconf syli
 sudo systemctl restart apache2
 
-
 # Install api branch from synclink spec repo
 # https://stackoverflow.com/questions/45958733/check-if-a-git-repo-exists-in-a-shell-script
 if ! [ -d "synclink-spec" ]; then
@@ -148,16 +176,30 @@ else
     cd "$currdir"
 fi
 
+# Add cron job
+if [ "${1;;}" != "cron" ] && ! [ -f "$CRONFILE" ]; then
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    echo "Add cron job"
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    if ! echo "* * * * * $SCRIPTPATH cron" > "$CRONFILE"; then
+        echo "ERROR: Could not add cron job!"; 
+        exit 3
+    fi
+    echo "Cron job successfully added"
+fi
+
 # Run SyncLink API Specification (in background)
-echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-echo "Starting SyncLink API Specification"
-echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-currdir="$PWD"
-pkill -f 'redocly' &>/dev/null
-cd synclink-spec
-npm install &>/dev/null
-nohup npm start &>/dev/null &
-cd "$currdir"
-myip=$(curl -s https://api.ipify.org)
-echo "SyncLink API Specification started on http://$myip"
-echo "OPERATION COMPLETE"
+if [ "${1;;}" != "cron" ] || [ "${2;;}" = "updated" ]; then
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    echo "Starting SyncLink API Specification"
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    currdir="$PWD"
+    pkill -f 'redocly' &>/dev/null
+    cd synclink-spec
+    npm install &>/dev/null
+    nohup npm start &>/dev/null &
+    cd "$currdir"
+    myip=$(curl -s https://api.ipify.org)
+    echo "SyncLink API Specification started on http://$myip"
+    echo "OPERATION COMPLETE"
+fi
