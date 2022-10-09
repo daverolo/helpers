@@ -33,14 +33,15 @@ SCRIPTALIAS="${SCRIPTNAME%.*}"
 USER=$(whoami)
 HOST=$(hostname -s)
 CURRENTDIR="$PWD"
+UNIX_TIMESTAMP=$(date +%s)
 
 # Download source and auto update if hash is different (and file exists on remote host)
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 echo "Checking script for updates"
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-wget --spider -q "$HttpFileStorage/$SCRIPTNAME"; exitcode=$?
+wget --spider -q "$HttpFileStorage/$SCRIPTNAME?$UNIX_TIMESTAMP"; exitcode=$?
 if [ $exitcode = 0 ]; then
-	wget -q -O "$SCRIPTPATH.updatecheck" "$HttpFileStorage/$SCRIPTNAME"	
+	wget -q -O "$SCRIPTPATH.updatecheck" "$HttpFileStorage/$SCRIPTNAME?$UNIX_TIMESTAMP"	
 	if [ $exitcode != 0 ] || ! [ -f "$SCRIPTPATH.updatecheck" ] ; then
 		echo "ERROR: Could not download latest update from $HttpFileStorage/$SCRIPTNAME!"
 		exit 1
