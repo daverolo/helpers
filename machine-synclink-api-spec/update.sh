@@ -31,7 +31,7 @@ cd ~
 #
 
 # Init basic vars
-ScriptVer="1.0.5"
+ScriptVer="1.0.6"
 HttpFileStorage="https://raw.githubusercontent.com/daverolo/helpers/main/machine-synclink-api-spec"
 
 # Init main vars
