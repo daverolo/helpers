@@ -1,7 +1,7 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
 # What: Install Docker quick and dirty
-# Link: wget https://github.com/daverolo/helpers/blob/main/core/installdocker.sh
+# Link: wget https://github.com/daverolo/helpers/blob/main/global/installdocker.sh
 # Usage: bash installdocker.sh
 # -----------------------------------------------------------------------------
 
