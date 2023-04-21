@@ -1,8 +1,15 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
 # What: Install Docker quick and dirty
-# Link: wget https://github.com/daverolo/helpers/blob/main/global/installdocker.sh
-# Usage: bash installdocker.sh
+# Link: wget https://raw.githubusercontent.com/daverolo/helpers/main/global/installdocker.sh
+# Usage: bash installdocker.sh [upgrade] [oldcompose]
+# Arguments:
+# - upgrade   : [OPTIONAL] Also upgrade OS before installing docker
+# - oldcompose: [OPTIONAL] Also install deprecated docker-compose
+# Examples:
+# bash installdocker.sh upgrade -> Will upgrade the OS and install docker
+# bash installdocker.sh oldcompose -> Will install docker and deprecated docker-compose 
+# bash installdocker.sh upgrade oldcompose -> Will upgrade the OS, install docker and deprecated docker-compose 
 # -----------------------------------------------------------------------------
 
 #
@@ -97,7 +104,7 @@ fi
 
 # Check if this is executed on Ubuntu or Debian (to prevent running this on the local OS by accident)
 OS_NAME=$(echo "${OS_NAME}" | tr '[:upper:]' '[:lower:]')
-if [ "${OS_NAME}" != 'ubuntu' ] || [ "${OS_NAME}" != 'debian' ]; then
+if [ "${OS_NAME}" != 'ubuntu' ] && [ "${OS_NAME}" != 'debian' ]; then
     die "error: this script is only allowed to run on Ubuntu or Debian"
 fi
 
