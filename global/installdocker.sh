@@ -139,6 +139,9 @@ fi
 DEBIAN_FRONTEND=noninteractive apt-get -y --assume-yes update || die "error: could not update apt repo"
 DEBIAN_FRONTEND=noninteractive apt-get -y --assume-yes install ca-certificates curl gnupg lsb-release || die "error: could not install ca-certificates"
 mkdir -m 0755 -p /etc/apt/keyrings || die "error: could not create keyrings directory"
+if [ -f "/etc/apt/keyrings/docker.gpg" ]; then
+	rm /etc/apt/keyrings/docker.gpg || die "error: could not remove old /etc/apt/keyrings/docker.gpg"
+fi
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg || die "error: could not create docker.gpg"
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null || die "error: could not create docker.list"
 #chmod a+r /etc/apt/keyrings/docker.gpg
@@ -150,6 +153,9 @@ DEBIAN_FRONTEND=noninteractive apt-get -y --assume-yes install docker-ce docker-
 if [ "$oldcompose" = "yes" ]; then
 	curl -sL https://github.com/docker/compose/releases/download/v2.16.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose || die "error: could not download and install docker-compose"
 	chmod +x /usr/local/bin/docker-compose || die "error: could not chmod docker-compose"
+	if [ -f "/usr/bin/docker-compose" ]; then
+		rm /usr/bin/docker-compose || die "error: could not remove old symlink to docker-compose"
+	fi
 	ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose || die "error: could create symlink to docker-compose"
 fi
 
@@ -158,7 +164,7 @@ say "Docker successfully installed"
 say "You may run docker tests via:"
 say "docker --version"
 say "docker compose version"
-if [ "$oldcompose" != "yes" ]; then
+if [ "$oldcompose" = "yes" ]; then
 	say "docker-compose version"
 fi
 say "sudo docker run hello-world"
