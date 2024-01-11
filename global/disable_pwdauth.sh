@@ -15,7 +15,7 @@
 
 # Make sure piped errors will result in $? (https://unix.stackexchange.com/a/73180/452265)
 set -o pipefail
-	
+
 # Set path manually since the script is maybe called via cron!
 PATH=~/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -75,6 +75,12 @@ fi
 # FLOW
 #
 
+# Check if password auth is aready dissabled
+if grep -q "^[[:space:]]*PasswordAuthentication no" /etc/ssh/sshd_config; then
+    say "ok: password authentication already disabled"
+    exit 0
+fi
+
 # Backup the sshd_config file
 cp /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +%Y%m%d%H%M%S).bak || die "error: could not backup sshd_config"
 
@@ -89,3 +95,7 @@ fi
 
 # Restart the SSH service
 systemctl restart ssh &>/dev/null || die "error: could not restart ssh service - please do it manually!"
+
+# Success
+say "ok: successfully disabled password authentication"
+exit 0
