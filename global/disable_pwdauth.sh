@@ -75,14 +75,15 @@ fi
 # FLOW
 #
 
-# Check if password auth is aready dissabled
+# Check if password auth is aready disabled
 if grep -q "^[[:space:]]*PasswordAuthentication no" /etc/ssh/sshd_config; then
     say "ok: password authentication already disabled"
     exit 0
 fi
 
 # Backup the sshd_config file
-cp /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +%Y%m%d%H%M%S).bak || die "error: could not backup sshd_config"
+BAKFILE="/etc/ssh/sshd_config.$(date +%Y%m%d%H%M%S).bak"
+cp /etc/ssh/sshd_config $BAKFILE || die "error: could not backup sshd_config"
 
 # Disable PasswordAuthentication in sshd_config
 sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config &>/dev/null
@@ -90,6 +91,13 @@ sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_
 
 # Check if the modification was successful
 if ! grep -q "^[[:space:]]*PasswordAuthentication no" /etc/ssh/sshd_config; then
+    mv $BAKFILE /etc/ssh/sshd_config || say "warning: could not restore sshd_config from backup $BAKFILE"
+    die "error: could not disable PasswordAuthentication in sshd_config - please do it manually!"
+fi
+
+# Verify sshd_config
+if ! /usr/sbin/sshd -T &>/dev/null; then
+    mv $BAKFILE /etc/ssh/sshd_config || say "warning: could not restore sshd_config from backup $BAKFILE"
     die "error: could not disable PasswordAuthentication in sshd_config - please do it manually!"
 fi
 
